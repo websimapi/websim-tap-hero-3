@@ -48,19 +48,16 @@ class AudioManager {
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume();
         }
+        Tone.Transport.position = 0; // Explicitly set position to 0
         Tone.Transport.start();
     }
 
     stopMusic() {
         Tone.Transport.stop();
+        // When stopping, also seek to the beginning for the next playthrough.
+        Tone.Transport.position = 0;
         // Cancel all scheduled events to prevent them from playing again on restart
         Tone.Transport.cancel(0);
-
-        // This is not necessary if we don't recreate the player
-        // if (this.player) {
-        //     this.player.unsync();
-        //     this.player.sync().start(0);
-        // }
     }
 
     getCurrentTime() {
