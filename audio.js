@@ -5,6 +5,7 @@ class AudioManager {
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this.sounds = {};
         this.player = null;
+        this.assetsLoaded = false;
     }
 
     async loadSound(name, url) {
@@ -15,6 +16,8 @@ class AudioManager {
     }
 
     async loadAssets() {
+        if (this.assetsLoaded) return;
+
         this.player = new Tone.Player("./song.mp3").toDestination();
         
         await Promise.all([
@@ -25,6 +28,7 @@ class AudioManager {
         
         // Sync the player to the transport. It will start at time 0.
         this.player.sync().start(0);
+        this.assetsLoaded = true;
     }
 
     playSound(name) {
@@ -36,6 +40,8 @@ class AudioManager {
     }
 
     async playMusic() {
+        await this.loadAssets(); // Ensure assets are loaded before playing
+
         if (Tone.context.state !== 'running') {
             await Tone.start();
         }
@@ -50,11 +56,11 @@ class AudioManager {
         // Cancel all scheduled events to prevent them from playing again on restart
         Tone.Transport.cancel(0);
 
-        // When restarting, we need the player to be ready to be synced again.
-        if (this.player) {
-            this.player.unsync();
-            this.player.sync().start(0);
-        }
+        // This is not necessary if we don't recreate the player
+        // if (this.player) {
+        //     this.player.unsync();
+        //     this.player.sync().start(0);
+        // }
     }
 
     getCurrentTime() {

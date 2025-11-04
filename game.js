@@ -25,6 +25,7 @@ class Game {
         this.combo = 0;
         this.maxCombo = 0;
         this.hitFeedback = []; // { x, y, text, time }
+        this.assetsLoaded = false;
 
         this.scoreElement = document.getElementById('score');
         this.comboElement = document.getElementById('combo');
@@ -47,12 +48,13 @@ class Game {
         this.gameState = 'LOADING';
         this.renderer.setLoading(true);
         try {
-            const [_, songNotes] = await Promise.all([
-                this.audio.loadAssets(),
-                loadSong()
-            ]);
-            
-            this.notes = songNotes;
+            if (!this.assetsLoaded) {
+                const songNotes = await loadSong();
+                this.notes = songNotes;
+                // Music will be loaded by playMusic on first run
+                this.assetsLoaded = true;
+            }
+
             this.reset();
             this.gameState = 'PLAYING';
             this.renderer.setLoading(false);
